@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/record-video-web/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Recorder</title>
+    <script type="module" crossorigin src="/record-video-web/assets/index-B5Z5a836.js"></script>
+    <link rel="stylesheet" crossorigin href="/record-video-web/assets/index-By8kT6aM.css">
+  </head>
+  <body>
+    <h1>🎥 Record and Play Video</h1>
+
+    <label for="videoSource">Select Camera:</label>
+    <select id="videoSource">
+      <option selected value disabled>-- Choose camera --</option>
+    </select>
+
+    <button id="mirrorBtn" data-mirrorred="false">Mirror</button>
+
+    <br />
+    <br />
+
+    <video
+      id="preview"
+      autoplay
+      muted
+      playsinline
+      style="width: 100%; max-width: 500px"
+    ></video>
+
+    <br />
+
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+
+    <br />
+    <br />
+
+    <p>Result:</p>
+    <video id="playback" controls style="width: 100%; max-width: 500px"></video>
+
+  </body>
+</html>
