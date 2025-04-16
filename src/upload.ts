@@ -1,4 +1,4 @@
-async function uploadAudio(blob) {
+async function uploadAudio(blob: Blob) {
   const formData = new FormData();
   formData.append("audio", blob);
   try {
