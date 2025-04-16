@@ -2,20 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Media Recorder</title>
-    <style>
-      body {
-        font-family: Calibri, "Trebuchet MS", sans-serif;
-      }
-
-      video#preview.mirror {
-        -webkit-transform: scaleX(-1);
-        -moz-transform: scaleX(-1);
-        -o-transform: scaleX(-1);
-        transform: scaleX(-1);
-      }
-    </style>
   </head>
   <body>
     <h1>🎥 Record and Play Video</h1>
@@ -49,9 +38,6 @@
     <p>Result:</p>
     <video id="playback" controls style="width: 100%; max-width: 500px"></video>
 
-    <script src="utils.js"></script>
-    <script src="storage.js"></script>
-    <script src="upload.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

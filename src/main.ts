@@ -1,15 +1,20 @@
-let mediaRecorder;
-let stream;
+import { saveChunk } from "./storage";
+import "./style.css";
 
-const preview = document.getElementById("preview");
-const playback = document.getElementById("playback");
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const mirrorBtn = document.getElementById("mirrorBtn");
-const videoSourceSelect = document.getElementById("videoSource");
+const preview = document.getElementById("preview") as HTMLVideoElement;
+const playback = document.getElementById("playback") as HTMLVideoElement;
+const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
+const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
+const mirrorBtn = document.getElementById("mirrorBtn") as HTMLButtonElement;
+const videoSourceSelect = document.getElementById(
+  "videoSource"
+) as HTMLSelectElement;
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const persistedDeviceId = localStorage.getItem("deviceId");
+
+let mediaRecorder: MediaRecorder | null = null;
+let stream: MediaStream | null = null;
 
 window.onload = () => {
   if (isIOS) {
@@ -23,7 +28,7 @@ window.onload = () => {
 };
 
 videoSourceSelect.onchange = async (e) => {
-  const deviceId = e.target.value;
+  const deviceId = (e.target as HTMLSelectElement).value;
   localStorage.setItem("deviceId", deviceId);
   await switchCamera(deviceId);
 };
@@ -52,7 +57,7 @@ async function initializeCamera() {
 }
 
 // === Camera / Stream ===
-async function switchCamera(deviceId) {
+async function switchCamera(deviceId: string) {
   try {
     const constraints = {
       video: { deviceId: { exact: deviceId } },
@@ -74,7 +79,7 @@ function stopStream() {
   }
 }
 
-function setStream(mediaStream) {
+function setStream(mediaStream: MediaStream) {
   stream = mediaStream;
   preview.srcObject = mediaStream;
 }
@@ -84,7 +89,7 @@ function toggleMirror() {
   const isMirrored = mirrorBtn.classList.toggle("mirrored");
   preview.style.transform = isMirrored ? "scaleX(-1)" : "scaleX(1)";
   mirrorBtn.innerHTML = isMirrored ? "Unmirror" : "Mirror";
-  mirrorBtn.dataset.mirrored = isMirrored;
+  mirrorBtn.dataset.mirrored = String(isMirrored);
 }
 
 // === Recording ===
@@ -96,7 +101,7 @@ async function startRecording() {
     : "";
   mediaRecorder = new MediaRecorder(stream, { mimeType });
 
-  const recordedChunks = [];
+  const recordedChunks: Blob[] = [];
 
   mediaRecorder.ondataavailable = async (e) => {
     if (e.data.size > 0) {
@@ -128,7 +133,7 @@ function stopRecording() {
 }
 
 // === Helpers ===
-function populateDeviceList(deviceInfos) {
+function populateDeviceList(deviceInfos: MediaDeviceInfo[]) {
   const videoInputs = deviceInfos.filter((d) => d.kind === "videoinput");
   videoSourceSelect.innerHTML = "";
 

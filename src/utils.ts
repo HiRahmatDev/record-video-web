@@ -1,4 +1,4 @@
-function logSizeOfBytes(bytes) {
+export function logSizeOfBytes(bytes: number) {
   console.log({
     B: `${bytes}B`,
     KB: `${(bytes / 1024).toFixed(2)}KB`,
