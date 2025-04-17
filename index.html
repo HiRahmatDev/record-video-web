@@ -5,10 +5,10 @@
     <link rel="icon" type="image/svg+xml" href="/record-video-web/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Media Recorder</title>
-    <script type="module" crossorigin src="/record-video-web/assets/index-B5Z5a836.js"></script>
+    <script type="module" crossorigin src="/record-video-web/assets/index-B1Gonyye.js"></script>
     <link rel="stylesheet" crossorigin href="/record-video-web/assets/index-By8kT6aM.css">
   </head>
-  <body>
+  <body style="padding-bottom: 48px">
     <h1>🎥 Record and Play Video</h1>
 
     <label for="videoSource">Select Camera:</label>
@@ -39,6 +39,11 @@
 
     <p>Result:</p>
     <video id="playback" controls style="width: 100%; max-width: 500px"></video>
+
+    <br />
+
+    <p>Video Chunks:</p>
+    <ul id="videoChunks" style="max-height: 400px; overflow-y: auto"></ul>
 
   </body>
 </html>
