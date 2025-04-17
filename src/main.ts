@@ -1,11 +1,18 @@
-import { saveChunk } from "./storage";
+import { configs } from "./configs";
+import {
+  clearAllChunks,
+  getVideoChunks,
+  initializeDatabase,
+  saveChunk,
+} from "./storage";
 import "./style.css";
 
-const preview = document.getElementById("preview") as HTMLVideoElement;
+const mirrorBtn = document.getElementById("mirrorBtn") as HTMLButtonElement;
 const playback = document.getElementById("playback") as HTMLVideoElement;
+const preview = document.getElementById("preview") as HTMLVideoElement;
 const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
 const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
-const mirrorBtn = document.getElementById("mirrorBtn") as HTMLButtonElement;
+const videoChunks = document.getElementById("videoChunks") as HTMLUListElement;
 const videoSourceSelect = document.getElementById(
   "videoSource"
 ) as HTMLSelectElement;
@@ -15,8 +22,9 @@ const persistedDeviceId = localStorage.getItem("deviceId");
 
 let mediaRecorder: MediaRecorder | null = null;
 let stream: MediaStream | null = null;
+let isRecording = false;
 
-window.onload = () => {
+window.addEventListener("load", async () => {
   // if (isIOS) {
   //   alert(
   //     "iOS does not support getUserMedia. Please use a different device or browser."
@@ -24,19 +32,30 @@ window.onload = () => {
   //   return;
   // }
 
-  initializeCamera();
-};
+  const db = await initializeDatabase();
 
-videoSourceSelect.onchange = async (e) => {
+  if (!db) return;
+
+  initializePlayback();
+  initializeCamera();
+});
+
+window.addEventListener("beforeunload", (e) => {
+  if (isRecording) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+videoSourceSelect.addEventListener("change", async (e) => {
   const deviceId = (e.target as HTMLSelectElement).value;
   localStorage.setItem("deviceId", deviceId);
   await switchCamera(deviceId);
-};
+});
 
-mirrorBtn.onclick = toggleMirror;
-
-startBtn.onclick = startRecording;
-stopBtn.onclick = stopRecording;
+mirrorBtn.addEventListener("click", toggleMirror);
+startBtn.addEventListener("click", startRecording);
+stopBtn.addEventListener("click", stopRecording);
 
 // === Initialization ===
 async function initializeCamera() {
@@ -53,6 +72,14 @@ async function initializeCamera() {
     populateDeviceList(await navigator.mediaDevices.enumerateDevices());
   } catch (err) {
     console.error("Permission denied or error:", err);
+  }
+}
+
+async function initializePlayback() {
+  const persistedRecordedChunks = await getVideoChunks();
+  if (persistedRecordedChunks.length) {
+    setPlayback(persistedRecordedChunks);
+    setListVideoChunks(persistedRecordedChunks);
   }
 }
 
@@ -84,6 +111,14 @@ function setStream(mediaStream: MediaStream) {
   preview.srcObject = mediaStream;
 }
 
+function setPlayback(blobParts: Blob[]) {
+  const fullBlob = new Blob(blobParts, { type: configs.VIDEO_TYPE });
+  const videoURL = URL.createObjectURL(fullBlob);
+
+  playback.src = videoURL;
+  playback.style.display = "block";
+}
+
 // === Mirror View ===
 function toggleMirror() {
   const isMirrored = mirrorBtn.classList.toggle("mirrored");
@@ -95,31 +130,46 @@ function toggleMirror() {
 // === Recording ===
 async function startRecording() {
   if (!stream) return;
+  isRecording = true;
 
-  const mimeType = MediaRecorder.isTypeSupported("video/webm")
-    ? "video/webm"
+  const mimeType = MediaRecorder.isTypeSupported(configs.VIDEO_TYPE)
+    ? configs.VIDEO_TYPE
     : "";
   mediaRecorder = new MediaRecorder(stream, { mimeType });
 
   const recordedChunks: Blob[] = [];
 
-  mediaRecorder.ondataavailable = async (e) => {
+  // Remove all persisted video chunks before save new chunks
+  const persistedRecordedChunks = await getVideoChunks();
+  if (persistedRecordedChunks.length) {
+    await clearAllChunks();
+  }
+
+  mediaRecorder.addEventListener("dataavailable", async (e) => {
     if (e.data.size > 0) {
       recordedChunks.push(e.data);
       await saveChunk(e.data);
       // await uploadAudio(e.data);
     }
-  };
+  });
 
-  mediaRecorder.onstop = () => {
-    const fullBlob = new Blob(recordedChunks, { type: "video/webm" });
+  mediaRecorder.addEventListener("stop", async () => {
+    const persistedRecordedChunks = await getVideoChunks();
+
+    setListVideoChunks(persistedRecordedChunks);
+
+    const blobParts = persistedRecordedChunks?.length
+      ? persistedRecordedChunks
+      : recordedChunks;
+
+    const fullBlob = new Blob(blobParts, { type: configs.VIDEO_TYPE });
     const videoURL = URL.createObjectURL(fullBlob);
+
     playback.src = videoURL;
     playback.style.display = "block";
-    playback.play();
-  };
+  });
 
-  mediaRecorder.start(2000); // chunk every 2s
+  mediaRecorder.start(configs.RECORD_TIME_SLICE_MS);
   startBtn.disabled = true;
   stopBtn.disabled = false;
 }
@@ -130,6 +180,26 @@ function stopRecording() {
   }
   startBtn.disabled = false;
   stopBtn.disabled = true;
+  isRecording = false;
+}
+
+async function setListVideoChunks(recordedChunks: Blob[]) {
+  const hasLi = videoChunks && videoChunks.querySelector("li") !== null;
+
+  if (hasLi) {
+    videoChunks.innerHTML = "";
+  }
+
+  recordedChunks.forEach((blob, index) => {
+    const li = document.createElement("li");
+
+    li.textContent = `Blob ${index + 1}: { size: ${(
+      blob.size /
+      (1024 * 1024)
+    ).toFixed(2)}MB, type: '${blob.type}' }`;
+
+    videoChunks.append(li);
+  });
 }
 
 // === Helpers ===

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Media Recorder</title>
   </head>
-  <body>
+  <body style="padding-bottom: 48px">
     <h1>🎥 Record and Play Video</h1>
 
     <label for="videoSource">Select Camera:</label>
@@ -37,6 +37,11 @@
 
     <p>Result:</p>
     <video id="playback" controls style="width: 100%; max-width: 500px"></video>
+
+    <br />
+
+    <p>Video Chunks:</p>
+    <ul id="videoChunks" style="max-height: 400px; overflow-y: auto"></ul>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
