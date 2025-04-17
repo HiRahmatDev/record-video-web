@@ -10,19 +10,19 @@ const videoSourceSelect = document.getElementById(
   "videoSource"
 ) as HTMLSelectElement;
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+// const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const persistedDeviceId = localStorage.getItem("deviceId");
 
 let mediaRecorder: MediaRecorder | null = null;
 let stream: MediaStream | null = null;
 
 window.onload = () => {
-  if (isIOS) {
-    alert(
-      "iOS does not support getUserMedia. Please use a different device or browser."
-    );
-    return;
-  }
+  // if (isIOS) {
+  //   alert(
+  //     "iOS does not support getUserMedia. Please use a different device or browser."
+  //   );
+  //   return;
+  // }
 
   initializeCamera();
 };
