@@ -1,20 +1,32 @@
 [
   {
     "extension": ".mp4",
-    "mime": "video/mp4",
+    "mime": "video/mp4; codecs=\"avc1.42E01E, mp4a.40.2\"",
     "codecs": "H.264 + AAC",
     "note": "Best compatibility across all browsers"
   },
   {
     "extension": ".webm",
-    "mime": "video/webm",
-    "codecs": "VP8/VP9 + Opus",
+    "mime": "video/webm; codecs=\"vp8, opus\"",
+    "codecs": "VP8 + Opus",
     "note": "Open format, supported in most modern browsers"
   },
   {
+    "extension": ".webm",
+    "mime": "video/webm; codecs=\"vp9, opus\"",
+    "codecs": "VP9 + Opus",
+    "note": "More efficient than VP8; supported in most modern browsers"
+  },
+  {
     "extension": ".ogv",
-    "mime": "video/ogg",
+    "mime": "video/ogg; codecs=\"theora, vorbis\"",
     "codecs": "Theora + Vorbis",
     "note": "Open format, works in Firefox and Chrome"
+  },
+  {
+    "extension": ".webm",
+    "mime": "video/webm; codecs=\"av1\"",
+    "codecs": "AV1",
+    "note": "Next-gen codec, modern browsers only, limited hardware support"
   }
 ]
