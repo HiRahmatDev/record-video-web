@@ -1,6 +1,7 @@
 import { configs } from "./configs";
 import {
   clearAllChunks,
+  deleteDatabase,
   getVideoChunks,
   initializeDatabase,
   saveChunk,
@@ -27,6 +28,7 @@ const chunkEverySelect = document.getElementById(
 const resultLabel = document.getElementById(
   "resultLabel"
 ) as HTMLParagraphElement;
+const clearDbBtn = document.getElementById("clearDbBtn") as HTMLButtonElement;
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const persistedDeviceId = localStorage.getItem("deviceId");
@@ -72,6 +74,7 @@ videoSourceSelect.addEventListener("change", async (e) => {
 mirrorBtn.addEventListener("click", toggleMirror);
 startBtn.addEventListener("click", startRecording);
 stopBtn.addEventListener("click", stopRecording);
+clearDbBtn.addEventListener("click", deleteDatabase);
 
 // === Initialization ===
 async function initializeCamera() {

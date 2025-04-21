@@ -94,3 +94,18 @@ export async function getVideoChunks() {
     };
   });
 }
+
+export const deleteDatabase = () => {
+  const request = indexedDB.deleteDatabase(DB_NAME);
+
+  request.onsuccess = () => {
+    console.log(`Database "${DB_NAME}" deleted successfully.`);
+  };
+  request.onerror = (event) => {
+    console.error(`Error deleting database "${DB_NAME}":`, event);
+  };
+  request.onblocked = () => {
+    // force reload the page to unblock the database
+    location.reload();
+  };
+};
