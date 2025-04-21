@@ -7,6 +7,7 @@ import {
 } from "./storage";
 import "./style.css";
 import supportedBrowserVideoFormatsJson from "./supportedBrowserVideoFormats.json";
+import { formatSize } from "./utils";
 
 const mirrorBtn = document.getElementById("mirrorBtn") as HTMLButtonElement;
 const playback = document.getElementById("playback") as HTMLVideoElement;
@@ -20,6 +21,9 @@ const videoSourceSelect = document.getElementById(
 const recordingFormatSelect = document.getElementById(
   "videoFormat"
 ) as HTMLSelectElement;
+const resultLabel = document.getElementById(
+  "resultLabel"
+) as HTMLParagraphElement;
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const persistedDeviceId = localStorage.getItem("deviceId");
@@ -123,6 +127,8 @@ function setPlayback(blobParts: Blob[]) {
   const fullBlob = new Blob(blobParts, { type: recordingFormatSelect.value });
   const videoURL = URL.createObjectURL(fullBlob);
 
+  updateResultLabel(fullBlob);
+
   playback.src = videoURL;
   playback.style.display = "block";
 }
@@ -155,6 +161,7 @@ async function startRecording() {
 
   mediaRecorder.addEventListener("dataavailable", async (e) => {
     if (e.data.size > 0) {
+      console.log(e.data);
       recordedChunks.push(e.data);
       await saveChunk(e.data);
       // await uploadAudio(e.data);
@@ -170,11 +177,7 @@ async function startRecording() {
       ? persistedRecordedChunks
       : recordedChunks;
 
-    const fullBlob = new Blob(blobParts, { type: recordingFormatSelect.value });
-    const videoURL = URL.createObjectURL(fullBlob);
-
-    playback.src = videoURL;
-    playback.style.display = "block";
+    setPlayback(blobParts);
   });
 
   mediaRecorder.start(configs.RECORD_TIME_SLICE_MS);
@@ -201,10 +204,9 @@ async function setListVideoChunks(recordedChunks: Blob[]) {
   recordedChunks.forEach((blob, index) => {
     const li = document.createElement("li");
 
-    li.textContent = `Blob ${index + 1}: { size: ${(
-      blob.size /
-      (1024 * 1024)
-    ).toFixed(2)}MB, type: '${blob.type}' }`;
+    li.textContent = `Blob ${index + 1}: { size: ${formatSize(
+      blob.size
+    )}, type: '${blob.type}' }`;
 
     videoChunks.append(li);
   });
@@ -236,4 +238,8 @@ function setVideoFormatList() {
       resolve(recordingFormatSelect.value);
     });
   });
+}
+
+function updateResultLabel(blob: Blob) {
+  resultLabel.innerHTML = `Result (${formatSize(blob.size)}):`;
 }
