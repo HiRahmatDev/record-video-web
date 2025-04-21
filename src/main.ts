@@ -21,6 +21,9 @@ const videoSourceSelect = document.getElementById(
 const recordingFormatSelect = document.getElementById(
   "videoFormat"
 ) as HTMLSelectElement;
+const chunkEverySelect = document.getElementById(
+  "chunkEvery"
+) as HTMLSelectElement;
 const resultLabel = document.getElementById(
   "resultLabel"
 ) as HTMLParagraphElement;
@@ -40,6 +43,8 @@ window.addEventListener("load", async () => {
       "iOS detected. If you're experiencing issues, your browser may not fully support camera access (getUserMedia). Try using a different browser or device for the best experience."
     );
   }
+
+  setDefaultChunkEvery();
 
   const db = await initializeDatabase();
 
@@ -161,7 +166,6 @@ async function startRecording() {
 
   mediaRecorder.addEventListener("dataavailable", async (e) => {
     if (e.data.size > 0) {
-      console.log(e.data);
       recordedChunks.push(e.data);
       await saveChunk(e.data);
       // await uploadAudio(e.data);
@@ -180,7 +184,7 @@ async function startRecording() {
     setPlayback(blobParts);
   });
 
-  mediaRecorder.start(configs.RECORD_TIME_SLICE_MS);
+  mediaRecorder.start(Number(chunkEverySelect.value));
   startBtn.disabled = true;
   stopBtn.disabled = false;
 }
@@ -238,6 +242,10 @@ function setVideoFormatList() {
       resolve(recordingFormatSelect.value);
     });
   });
+}
+
+function setDefaultChunkEvery() {
+  chunkEverySelect.value = String(configs.DEFAULT_RECORD_TIME_SLICE);
 }
 
 function updateResultLabel(blob: Blob) {
