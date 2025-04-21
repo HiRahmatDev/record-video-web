@@ -223,7 +223,6 @@ function getSupportedMimeType() {
 function preventUnloadDuringRecording(e: BeforeUnloadEvent) {
   if (isRecording) {
     e.preventDefault();
-    e.returnValue = "";
   }
 }
 
