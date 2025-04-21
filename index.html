@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/record-video-web/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Media Recorder</title>
-    <script type="module" crossorigin src="/record-video-web/assets/index-B1Gonyye.js"></script>
+    <script type="module" crossorigin src="/record-video-web/assets/index-2ORBrz7q.js"></script>
     <link rel="stylesheet" crossorigin href="/record-video-web/assets/index-By8kT6aM.css">
   </head>
   <body style="padding-bottom: 48px">
@@ -17,6 +17,29 @@
     </select>
 
     <button id="mirrorBtn" data-mirrorred="false">Mirror</button>
+
+    <br />
+
+    <label for="videoFormat">Select Video Recording Format:</label>
+    <select id="videoFormat">
+      <option selected value disabled>-- Choose format --</option>
+    </select>
+
+    <br />
+
+    <label for="chunkEvery">Chunk every:</label>
+    <select id="chunkEvery">
+      <option>-- Choose chunk time --</option>
+      <option value="1000">1 second</option>
+      <option value="5000">5 seconds</option>
+      <option value="10000">10 seconds</option>
+      <option value="30000">30 seconds</option>
+      <option value="60000">1 minute</option>
+      <option value="120000">2 minutes</option>
+      <option value="300000">5 minutes</option>
+      <option value="600000">10 minutes</option>
+      <option value="1800000">30 minutes</option>
+    </select>
 
     <br />
     <br />
@@ -37,7 +60,7 @@
     <br />
     <br />
 
-    <p>Result:</p>
+    <p id="resultLabel">Result:</p>
     <video id="playback" controls style="width: 100%; max-width: 500px"></video>
 
     <br />
