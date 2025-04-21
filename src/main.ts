@@ -6,6 +6,7 @@ import {
   saveChunk,
 } from "./storage";
 import "./style.css";
+import supportedBrowserVideoFormatsJson from "./supportedBrowserVideoFormats.json";
 
 const mirrorBtn = document.getElementById("mirrorBtn") as HTMLButtonElement;
 const playback = document.getElementById("playback") as HTMLVideoElement;
@@ -16,28 +17,34 @@ const videoChunks = document.getElementById("videoChunks") as HTMLUListElement;
 const videoSourceSelect = document.getElementById(
   "videoSource"
 ) as HTMLSelectElement;
+const recordingFormatSelect = document.getElementById(
+  "videoFormat"
+) as HTMLSelectElement;
 
-// const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const persistedDeviceId = localStorage.getItem("deviceId");
+
+const videoFormatList = supportedBrowserVideoFormatsJson;
 
 let mediaRecorder: MediaRecorder | null = null;
 let stream: MediaStream | null = null;
 let isRecording = false;
 
 window.addEventListener("load", async () => {
-  // if (isIOS) {
-  //   alert(
-  //     "iOS does not support getUserMedia. Please use a different device or browser."
-  //   );
-  //   return;
-  // }
+  if (isIOS) {
+    alert(
+      "iOS detected. If you're experiencing issues, your browser may not fully support camera access (getUserMedia). Try using a different browser or device for the best experience."
+    );
+  }
 
   const db = await initializeDatabase();
 
   if (!db) return;
 
-  initializePlayback();
+  await setVideoFormatList();
+
   initializeCamera();
+  initializePlayback();
 });
 
 window.addEventListener("beforeunload", (e) => {
@@ -103,6 +110,7 @@ function stopStream() {
   if (stream) {
     stream.getTracks().forEach((track) => track.stop());
     stream = null;
+    stopRecording();
   }
 }
 
@@ -112,7 +120,7 @@ function setStream(mediaStream: MediaStream) {
 }
 
 function setPlayback(blobParts: Blob[]) {
-  const fullBlob = new Blob(blobParts, { type: configs.VIDEO_TYPE });
+  const fullBlob = new Blob(blobParts, { type: recordingFormatSelect.value });
   const videoURL = URL.createObjectURL(fullBlob);
 
   playback.src = videoURL;
@@ -132,8 +140,8 @@ async function startRecording() {
   if (!stream) return;
   isRecording = true;
 
-  const mimeType = MediaRecorder.isTypeSupported(configs.VIDEO_TYPE)
-    ? configs.VIDEO_TYPE
+  const mimeType = MediaRecorder.isTypeSupported(recordingFormatSelect.value)
+    ? recordingFormatSelect.value
     : "";
   mediaRecorder = new MediaRecorder(stream, { mimeType });
 
@@ -162,7 +170,7 @@ async function startRecording() {
       ? persistedRecordedChunks
       : recordedChunks;
 
-    const fullBlob = new Blob(blobParts, { type: configs.VIDEO_TYPE });
+    const fullBlob = new Blob(blobParts, { type: recordingFormatSelect.value });
     const videoURL = URL.createObjectURL(fullBlob);
 
     playback.src = videoURL;
@@ -213,5 +221,19 @@ function populateDeviceList(deviceInfos: MediaDeviceInfo[]) {
     option.text = device.label || `Camera ${index + 1}`;
     option.selected = persistedDeviceId === device.deviceId || index === 0;
     videoSourceSelect.appendChild(option);
+  });
+}
+
+function setVideoFormatList() {
+  return new Promise((resolve) => {
+    videoFormatList.forEach((format, index) => {
+      const option = document.createElement("option");
+      option.value = format.mime;
+      option.text = `${format.extension}, ${format.codecs} (${format.note})`;
+      option.selected =
+        configs.DEFAULT_RECORDING_FORMAT === format.mime || index === 0;
+      recordingFormatSelect.appendChild(option);
+      resolve(recordingFormatSelect.value);
+    });
   });
 }
